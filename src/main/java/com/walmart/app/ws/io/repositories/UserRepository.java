@@ -1,4 +1,4 @@
-package com.walmart.app.ws;
+package com.walmart.app.ws.io.repositories;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
