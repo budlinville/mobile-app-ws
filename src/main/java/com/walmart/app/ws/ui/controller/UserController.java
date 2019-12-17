@@ -17,6 +17,9 @@ import com.walmart.app.ws.service.UserService;
 import com.walmart.app.ws.shared.dto.UserDto;
 import com.walmart.app.ws.ui.model.request.UserDetailsRequestModel;
 import com.walmart.app.ws.ui.model.response.ErrorMessages;
+import com.walmart.app.ws.ui.model.response.OperationStatusModel;
+import com.walmart.app.ws.ui.model.response.RequestOperationName;
+import com.walmart.app.ws.ui.model.response.RequestOperationStatus;
 import com.walmart.app.ws.ui.model.response.UserRest;
 
 @RestController
@@ -26,6 +29,9 @@ public class UserController {
 	@Autowired
 	UserService userService;
 	
+	/**************
+	 * GET USER
+	 **************/
 	@GetMapping(
 			path="/{id}", 
 			produces={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
@@ -39,6 +45,9 @@ public class UserController {
 		return retVal;
 	}
 	
+	/**************
+	 * CREATE USER
+	 **************/
 	@PostMapping(
 			consumes={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE },
 			produces={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
@@ -57,6 +66,9 @@ public class UserController {
 		return retVal;
 	}
 	
+	/**************
+	 * UPDATE USER
+	 **************/
 	@PutMapping(
 			path="/{id}",
 			consumes={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE },
@@ -76,8 +88,22 @@ public class UserController {
 		return retVal;
 	}
 	
-	@DeleteMapping
-	public String deleteUser() {
-		return "delete user was called";
+	/**************
+	 * DELETE USER
+	 **************/
+	@DeleteMapping(
+			path="/{id}",
+			produces={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
+	)
+	public OperationStatusModel deleteUser(@PathVariable String id) {
+		OperationStatusModel retVal = new OperationStatusModel();
+		
+		retVal.setOperationName(RequestOperationName.DELETE.name());
+		
+		userService.deleteUser(id);
+		
+		retVal.setOperationResult(RequestOperationStatus.SUCCESS.name());
+		
+		return retVal;
 	}
 }
