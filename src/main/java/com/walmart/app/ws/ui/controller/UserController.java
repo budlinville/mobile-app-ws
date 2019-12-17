@@ -1,5 +1,8 @@
 package com.walmart.app.ws.ui.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.walmart.app.ws.exceptions.UserServiceException;
@@ -55,7 +59,8 @@ public class UserController {
 	public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails) throws UserServiceException {
 		UserRest retVal = new UserRest();
 		
-		if (userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+		if (userDetails.getFirstName().isEmpty())
+			throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 		
 		UserDto userDto = new UserDto();
 		BeanUtils.copyProperties(userDetails, userDto);
@@ -77,7 +82,8 @@ public class UserController {
 	public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails) {
 		UserRest retVal = new UserRest();
 		
-		if (userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+		if (userDetails.getFirstName().isEmpty())
+			throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 		
 		UserDto userDto = new UserDto();
 		BeanUtils.copyProperties(userDetails, userDto);
@@ -103,6 +109,27 @@ public class UserController {
 		userService.deleteUser(id);
 		
 		retVal.setOperationResult(RequestOperationStatus.SUCCESS.name());
+		
+		return retVal;
+	}
+	
+	@GetMapping( produces={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE } )
+	public List<UserRest> getUsers(
+			@RequestParam(value="page", defaultValue="1") int page,
+			@RequestParam(value="limit", defaultValue="25") int limit
+	) {
+		List<UserRest> retVal = new ArrayList<UserRest>();
+		
+		if (page>0)
+			page = page - 1;
+		
+		List<UserDto> users = userService.getUsers(page, limit);
+		
+		for (UserDto userDto : users) {
+			UserRest userModel = new UserRest();
+			BeanUtils.copyProperties(userDto, userModel);
+			retVal.add(userModel);
+		}
 		
 		return retVal;
 	}
