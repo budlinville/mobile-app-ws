@@ -26,7 +26,8 @@ public class UserController {
 	@Autowired
 	UserService userService;
 	
-	@GetMapping(path="/{id}", 
+	@GetMapping(
+			path="/{id}", 
 			produces={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
 	)
 	public UserRest getUser(@PathVariable String id) {
@@ -56,9 +57,23 @@ public class UserController {
 		return retVal;
 	}
 	
-	@PutMapping
-	public String updateUser() {
-		return "update user was called";
+	@PutMapping(
+			path="/{id}",
+			consumes={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE },
+			produces={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
+	)
+	public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails) {
+		UserRest retVal = new UserRest();
+		
+		if (userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+		
+		UserDto userDto = new UserDto();
+		BeanUtils.copyProperties(userDetails, userDto);
+		
+		UserDto updatedUser = userService.updateUser(id, userDto);
+		BeanUtils.copyProperties(updatedUser, retVal);
+		
+		return retVal;
 	}
 	
 	@DeleteMapping
