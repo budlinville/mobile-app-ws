@@ -2,6 +2,7 @@ package com.walmart.app.ws.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +43,11 @@ public class UserServiceImpl implements UserService {
 
 		UserEntity userEntity = new UserEntity();
 		BeanUtils.copyProperties(user, userEntity);
-
-		String publicUserId = utils.generateUserId(30);
+		
+		// String publicUserId = utils.generateUserId(30);
+		String publicUserId = UUID.randomUUID().toString();
 		userEntity.setUserId(publicUserId);
+		
 		userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
 		UserEntity storedUserDetails = userRepository.save(userEntity);
