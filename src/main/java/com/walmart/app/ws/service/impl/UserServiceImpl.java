@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.walmart.app.ws.exceptions.UserServiceException;
 import com.walmart.app.ws.io.entity.UserEntity;
 import com.walmart.app.ws.io.repositories.UserRepository;
 import com.walmart.app.ws.service.UserService;
@@ -100,11 +101,12 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userRepository.findByUserId(userId);
 
 		if (userEntity == null)
-			throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+			throw new UserServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
 		userEntity.setFirstName(user.getFirstName());
 		userEntity.setLastName(user.getLastName());
 
+		// No SQL query... just use 'save'... how great is that
 		UserEntity updatedUserDetails = userRepository.save(userEntity);
 		BeanUtils.copyProperties(updatedUserDetails, retVal);
 
