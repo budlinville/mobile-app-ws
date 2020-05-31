@@ -1,8 +1,11 @@
 package com.walmart.app.ws.ui.controller;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -17,9 +20,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.walmart.app.ws.exceptions.UserServiceException;
+import com.walmart.app.ws.service.AddressService;
 import com.walmart.app.ws.service.UserService;
+import com.walmart.app.ws.shared.dto.AddressDTO;
 import com.walmart.app.ws.shared.dto.UserDto;
 import com.walmart.app.ws.ui.model.request.UserDetailsRequestModel;
+import com.walmart.app.ws.ui.model.response.AddressesRest;
 import com.walmart.app.ws.ui.model.response.ErrorMessages;
 import com.walmart.app.ws.ui.model.response.OperationStatusModel;
 import com.walmart.app.ws.ui.model.response.RequestOperationName;
@@ -33,6 +39,9 @@ public class UserController {
 	@Autowired
 	UserService userService;
 	
+	@Autowired
+	AddressService addressesService;
+
 	/**************
 	 * GET USER
 	 **************/
@@ -62,11 +71,14 @@ public class UserController {
 		if (userDetails.getFirstName().isEmpty())
 			throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 		
-		UserDto userDto = new UserDto();
-		BeanUtils.copyProperties(userDetails, userDto);
+		//UserDto userDto = new UserDto();
+		//BeanUtils.copyProperties(userDetails, userDto);
+		//Below code is better for mapping deeply nested object
+		ModelMapper modelMapper = new ModelMapper();
+		UserDto userDto = modelMapper.map(userDetails, UserDto.class);
 		
 		UserDto createdUser = userService.createUser(userDto);
-		BeanUtils.copyProperties(createdUser, retVal);
+		retVal = modelMapper.map(createdUser, UserRest.class);
 		
 		return retVal;
 	}
@@ -132,5 +144,39 @@ public class UserController {
 		}
 		
 		return retVal;
+	}
+
+	/***************************************************************
+	 * GET USER ADDRESSES
+	 * http://localhost:8080/mobile-app-ws/users/<userId>/addresses
+	 ***************************************************************/
+	@GetMapping(
+			path="/{id}/addresses",
+			produces={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
+	)
+	public List<AddressesRest> getUserAddresses(@PathVariable String id) {
+		List<AddressesRest> retVal = new ArrayList<>();
+
+		List<AddressDTO> addressesDTO = addressesService.getAddresses(id);
+
+		if (addressesDTO != null && !addressesDTO.isEmpty()) {
+			Type listType = new TypeToken<List<AddressesRest>>() {}.getType();
+			retVal = new ModelMapper().map(addressesDTO, listType);
+		}
+
+		return retVal;
+	}
+
+	/*******************
+	 * GET USER ADDRESS
+	 *******************/
+	@GetMapping(
+			path="/{userId}/addresses/{addressId}",
+			produces={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
+	)
+	public AddressesRest getUserAddress(@PathVariable String addressId) {
+		AddressDTO addressDTO = addressesService.getAddress(addressId);
+
+		return new ModelMapper().map(addressDTO, AddressesRest.class);
 	}
 }
