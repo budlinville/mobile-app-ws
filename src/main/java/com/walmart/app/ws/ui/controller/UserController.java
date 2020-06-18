@@ -2,12 +2,17 @@ package com.walmart.app.ws.ui.controller;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -154,7 +159,7 @@ public class UserController {
 			path="/{id}/addresses",
 			produces={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
 	)
-	public List<AddressesRest> getUserAddresses(@PathVariable String id) {
+	public CollectionModel<AddressesRest> getUserAddresses(@PathVariable String id) {
 		List<AddressesRest> retVal = new ArrayList<>();
 
 		List<AddressDTO> addressesDTO = addressesService.getAddresses(id);
@@ -162,21 +167,68 @@ public class UserController {
 		if (addressesDTO != null && !addressesDTO.isEmpty()) {
 			Type listType = new TypeToken<List<AddressesRest>>() {}.getType();
 			retVal = new ModelMapper().map(addressesDTO, listType);
+			
+			// Add Embedded Links
+			for (AddressesRest addressRest : retVal) {
+				Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
+						.methodOn(UserController.class)
+						.getUserAddress(id, addressRest.getAddressId()))
+						.withSelfRel();
+				addressRest.add(selfLink);
+			}
 		}
-
-		return retVal;
+		
+		Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(id).withRel("user");
+		Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
+				.methodOn(UserController.class)
+				.getUserAddresses(id))
+				.withSelfRel();
+		
+		return CollectionModel.of(retVal, userLink, selfLink);
 	}
 
-	/*******************
+	/***************************************
 	 * GET USER ADDRESS
-	 *******************/
+	 * Adding Links.. two methods
+	 * 	- Representation Model (Lecture 120)
+	 * 	- Entity Model (Lecture 121)
+	 ***************************************/
 	@GetMapping(
 			path="/{userId}/addresses/{addressId}",
 			produces={ MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
 	)
-	public AddressesRest getUserAddress(@PathVariable String addressId) {
+	public AddressesRest getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
 		AddressDTO addressDTO = addressesService.getAddress(addressId);
 
-		return new ModelMapper().map(addressDTO, AddressesRest.class);
+		AddressesRest retVal = new ModelMapper().map(addressDTO, AddressesRest.class);
+		
+		// http://localhost:8080/users/<userId>
+		Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).withRel("user");
+		// http://localhost:8080/users/<userId>/addresses
+		Link userAddressesLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
+				.methodOn(UserController.class)
+				.getUserAddresses(userId))
+				//.slash(userId)
+				//.slash("addresses")
+				.withRel("addresses");
+		// http://localhost:8080/users/<userId>/addresses/<addressId>
+		Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
+				.methodOn(UserController.class)
+				.getUserAddress(userId, addressId))
+				//.slash(userId)
+				//.slash("addresses")
+				//.slash(addressId)
+				.withSelfRel();
+		
+		retVal.add(userLink);
+		retVal.add(userAddressesLink);
+		retVal.add(selfLink);
+		return retVal;
+		
+		/* Alternative method for adding links... This method's return type 
+		 * will be EntityModel<AddressRest> and the AddressRest class will no
+		 * longer extend RepresentationModel
+		 */
+		//return EntityModel.of(retVal, Arrays.asList(userLink, userAddressesLink, selfLink));
 	}
 }
