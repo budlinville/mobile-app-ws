@@ -20,6 +20,7 @@ import com.walmart.app.ws.exceptions.UserServiceException;
 import com.walmart.app.ws.io.entity.UserEntity;
 import com.walmart.app.ws.io.repositories.UserRepository;
 import com.walmart.app.ws.service.UserService;
+import com.walmart.app.ws.shared.AmazonSES;
 import com.walmart.app.ws.shared.Utils;
 import com.walmart.app.ws.shared.dto.AddressDTO;
 import com.walmart.app.ws.shared.dto.UserDto;
@@ -59,12 +60,17 @@ public class UserServiceImpl implements UserService {
 		String publicUserId = UUID.randomUUID().toString();
 		userEntity.setUserId(publicUserId);
 		userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-
+		userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(publicUserId));
+		userEntity.setEmailVerificationStatus(false);
+		
 		UserEntity storedUserDetails = userRepository.save(userEntity);
 
 		//BeanUtils.copyProperties(storedUserDetails, retVal);
 		UserDto retVal = modelMapper.map(storedUserDetails, UserDto.class);
-
+		
+		// Send an email message to the user to verify their email address
+		new AmazonSES().verifyEmail(retVal);
+		
 		return retVal;
 	}
 
@@ -88,7 +94,10 @@ public class UserServiceImpl implements UserService {
 		if (userEntity == null)
 			throw new UsernameNotFoundException(email);
 
-		return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
+		return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
+				userEntity.getEmailVerificationStatus(),
+				true, true,
+				true, new ArrayList<>());
 	}
 
 	@Override
@@ -147,6 +156,25 @@ public class UserServiceImpl implements UserService {
 			retVal.add(userDto);
 		}
 		
+		return retVal;
+	}
+
+	@Override
+	public boolean verifyEmailToken(String token) {
+		boolean retVal = false;
+		
+		// Find user by token
+		UserEntity userEntity = userRepository.findUserByEmailVerificationToken(token);
+		
+		if (userEntity != null) {
+			boolean tokenExpired = Utils.hasTokenExpired(token);
+			if (!tokenExpired) {
+				userEntity.setEmailVerificationToken(null);
+				userEntity.setEmailVerificationStatus(Boolean.TRUE);
+				userRepository.save(userEntity);
+				retVal = true;
+			}
+		}
 		return retVal;
 	}
 }

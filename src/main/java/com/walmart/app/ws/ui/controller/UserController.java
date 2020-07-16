@@ -231,4 +231,26 @@ public class UserController {
 		 */
 		//return EntityModel.of(retVal, Arrays.asList(userLink, userAddressesLink, selfLink));
 	}
+	
+	/****************************************************************************
+	 * Email Verification
+	 * 
+	 * http://localhost:8080/mobile-app-ws/users/email-verification?token=foobar
+	 ****************************************************************************/
+	@GetMapping(
+			path="/email-verification",
+			produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }
+	)
+	public OperationStatusModel verifyEmailToken(
+			@RequestParam(value="token") String token
+	) {
+		OperationStatusModel retVal = new OperationStatusModel();
+		retVal.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
+		boolean isVerified = userService.verifyEmailToken(token);
+		retVal.setOperationResult( isVerified
+				? RequestOperationStatus.SUCCESS.name()
+				: RequestOperationStatus.ERROR.name()
+		);
+		return retVal;
+	}
 }
