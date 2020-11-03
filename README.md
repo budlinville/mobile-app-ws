@@ -2,19 +2,18 @@
 This application was based on a Springboot Udemy class. It includes all necessary code for a production-style web service, including user authentication/authorization and may serve as a template for future such projects.
 
 ## Running on Local
-Make sure Java is installed
-https://www.appsdeveloperblog.com/how-to-set-java_home-on-mac/
+**Make sure Java is installed**
+- https://www.appsdeveloperblog.com/how-to-set-java_home-on-mac/
+- Run ```bash java -version``` to make sure install was successful
 
-Run ```bash java -version``` to make sure install was successful
-
-Make sure Maven is installed
+**Make sure Maven is installed**
 - https://www.journaldev.com/2348/install-maven-mac-os
 - Run ```bash source ~/.profile``` or ```bash source ~/.bash_profile``` to make sure changes to either file take effect immediately.
 - Run ```bash mvn -version``` to make sure install was successful
 
-Install Spring Tool Suite (STS): https://spring.io/tools
+**Install Spring Tool Suite (STS):** https://spring.io/tools
 
-Install MySQL: https://dev.mysql.com/downloads/mysql/
+**Install MySQL:** https://dev.mysql.com/downloads/mysql/
 
 Open MySQL Workbench and create new schema named after what ever is specified in the ```bash application.properties``` file
 ```
