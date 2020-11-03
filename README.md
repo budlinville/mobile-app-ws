@@ -1,12 +1,12 @@
 # Generic Springboot Template Application
-This application was based on a Springboot Udemy class. It includes all necessary code for a production-style web service, including user authentication/authorization and may serve as a template for future such projects.
+This application was based on a Springboot Udemy class. It includes all necessary code for a production-style web service, including user authentication/authorization and may serve as a template or starting point for future such projects.
 
 ## Running on Local
-**Make sure Java is installed**
+### Make sure Java is installed
 - https://www.appsdeveloperblog.com/how-to-set-java_home-on-mac/
 - Run ```java -version``` to make sure install was successful
 
-**Make sure Maven is installed**
+### Make sure Maven is installed
 - https://www.journaldev.com/2348/install-maven-mac-os
 - Run ```source ~/.profile``` or ```source ~/.bash_profile``` to make sure changes to either file take effect immediately.
 - Run ```mvn -version``` to make sure install was successful
@@ -24,10 +24,10 @@ Create user '<username>'@'localhost' identified by '<password>';
 Grant all privileges on <db-name>.* to '<username>'@'localhost';
 Flush privileges;
 ```
-## Add properties file
+### Add properties file
 Add copy of application.properties file to ```src/main/resources```
 
-## Add AWS credentials file to system
+### Add AWS credentials file to system
 Save to:
 - Linux, Unix, MacOS: ```~/.aws/credentials```
 - Windows: ```C:\Users\<USERNAME>\.aws\credentials```
@@ -52,7 +52,7 @@ or (e.g):
 
 ### Update Software inside ec2 instance
 - Once inside ec2 instance, update software: ```sudo yum update```
-- Update Java:
+- Download Java:
 ```bash
 java -version
 yum list java*
@@ -74,7 +74,7 @@ sudo yum install tomcat8-admin-webapps
 - Check tomcat status: ```sudo service tomcat8 status```
 
 ### Configure tomcat to access Manager GUI:
-- Find and edot tomcat-users.xml
+- Find and edit tomcat-users.xml
 ```bash
 whereis tomcat8
 cd /usr/share/tomcat8/conf
@@ -88,13 +88,13 @@ sudo vi tomcat-users.xml
 ```
 
 ### Connect to Tomcat's Manager GUI from local machine:
+- Navigate to and edit Tomcat's context file
 ```bash
 cd ./var/lib/tomcat8/webapps/manager/META-INF
 sudo vi context.xml
 ```
-In the "allow" property of the "Valve" tag, add ```|<ip.address>```
-
-Can now add/remove/update services at http://<publicDNS>:8080/manager/html
+- In the "allow" property of the "Valve" tag, add ```|<ip.address>```
+- Can now add/remove/update services at ```http://<publicDNS>:8080/manager/html```
 
 ### Install MySQL
 ```bash
