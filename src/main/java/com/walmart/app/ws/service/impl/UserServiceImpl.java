@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.walmart.app.ws.exceptions.UserServiceException;
+import com.walmart.app.ws.io.entity.PasswordResetTokenEntity;
 import com.walmart.app.ws.io.entity.UserEntity;
 import com.walmart.app.ws.io.repositories.UserRepository;
 import com.walmart.app.ws.service.UserService;
@@ -25,6 +26,7 @@ import com.walmart.app.ws.shared.Utils;
 import com.walmart.app.ws.shared.dto.AddressDTO;
 import com.walmart.app.ws.shared.dto.UserDto;
 import com.walmart.app.ws.ui.model.response.ErrorMessages;
+import com.walmart.app.ws.io.repositories.PasswordResetTokenRepository;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -37,6 +39,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+	@Autowired
+	PasswordResetTokenRepository passwordResetTokenRepository;
 
 	@Override
 	public UserDto createUser(UserDto user) {
@@ -175,6 +180,31 @@ public class UserServiceImpl implements UserService {
 				retVal = true;
 			}
 		}
+		return retVal;
+	}
+
+	@Override
+	public boolean requestPasswordReset(String email) {
+		boolean retVal = false;
+		
+		UserEntity userEntity = userRepository.findByEmail(email);
+		
+		if (userEntity == null) {
+			return retVal;
+		}
+		
+		String token = utils.generatePasswordResetToken(userEntity.getUserId());
+		
+		PasswordResetTokenEntity passwordResetTokenEntity = new PasswordResetTokenEntity();
+		passwordResetTokenEntity.setToken(token);
+		passwordResetTokenEntity.setUserDetails(userEntity);
+		passwordResetTokenRepository.save(passwordResetTokenEntity);
+		
+		retVal = new AmazonSES().sendPasswordResetRequest(
+				userEntity.getFirstName(),
+				userEntity.getEmail(),
+				token);
+		
 		return retVal;
 	}
 }

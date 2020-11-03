@@ -47,12 +47,19 @@ public class Utils {
 		return tokenExpDate.before(today);
 	}
 	
+	private String generateToken(String id, long lifetime) {
+		return Jwts.builder()
+			.setSubject(id)
+			.setExpiration(new Date(System.currentTimeMillis() + lifetime))
+			.signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
+			.compact();
+	}
+	
 	public String generateEmailVerificationToken(String userId) {
-		String token = Jwts.builder()
-				.setSubject(userId)
-				.setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-				.signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
-				.compact();
-		return token;
+		return generateToken(userId, SecurityConstants.EXPIRATION_TIME);
+	}
+	
+	public String generatePasswordResetToken(String userId) {
+		return generateToken(userId, SecurityConstants.PASSWORD_RESET_EXPIRATION_TIME);
 	}
 }
