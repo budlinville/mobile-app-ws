@@ -31,6 +31,7 @@ import com.walmart.app.ws.shared.dto.AddressDTO;
 import com.walmart.app.ws.shared.dto.UserDto;
 import com.walmart.app.ws.ui.model.request.PasswordResetRequestModel;
 import com.walmart.app.ws.ui.model.request.UserDetailsRequestModel;
+import com.walmart.app.ws.ui.model.request.PasswordResetModel;
 import com.walmart.app.ws.ui.model.response.AddressesRest;
 import com.walmart.app.ws.ui.model.response.ErrorMessages;
 import com.walmart.app.ws.ui.model.response.OperationStatusModel;
@@ -256,15 +257,14 @@ public class UserController {
 	}
 	
 	/****************************************************************************
-	 * Password Reset
+	 * Password Reset Request
 	 * 
 	 * http://localhost:8080/mobile-app-ws/users/password-reset-request
 	 ****************************************************************************/
 	@PostMapping(
 			path = "/password-reset-request",
 			produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-			consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
-	)
+			consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel passwordResetRequestModel) {
 		OperationStatusModel retVal = new OperationStatusModel();
 		
@@ -278,4 +278,27 @@ public class UserController {
 		return retVal;
 	}
 	
+	/****************************************************************************
+	 * Password Reset
+	 * 
+	 * http://localhost:8080/mobile-app-ws/users/password-reset
+	 ****************************************************************************/
+	@PostMapping(
+			path = "/password-reset",
+			consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+	public OperationStatusModel resetPassword(@RequestBody PasswordResetModel passwordResetModel) {
+		OperationStatusModel retVal = new OperationStatusModel();
+		
+		boolean operationResult = userService.resetPassword(
+				passwordResetModel.getToken(),
+				passwordResetModel.getPassword());
+		
+		retVal.setOperationName(RequestOperationName.PASSWORD_RESET.name());
+		retVal.setOperationResult(RequestOperationStatus.ERROR.name());
+		
+		if (operationResult) {
+			retVal.setOperationResult(RequestOperationStatus.SUCCESS.name());
+		}
+		return retVal;
+	}
 }

@@ -8,4 +8,6 @@ import com.walmart.app.ws.io.entity.PasswordResetTokenEntity;
 @Repository
 public interface PasswordResetTokenRepository extends CrudRepository<PasswordResetTokenEntity, Long>{
 	// save method is auto-generated from Spring
+	
+	PasswordResetTokenEntity findByToken(String token);
 }
