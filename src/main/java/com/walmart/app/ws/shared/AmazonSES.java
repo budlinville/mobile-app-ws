@@ -20,12 +20,16 @@ public class AmazonSES {
 	
 	final String PASSWORD_RESET_SUBJECT = "Password reset request";
 	
+	final String DEV_SERVER = "http://localhost:8080";
+	final String PROD_SERVER = "http://ec2-3-21-104-167.us-east-2.compute.amazonaws.com:8080";
+	final String SERVER = DEV_SERVER;
+	
 	// The HTML body for the email.
 	// TODO : Update localhost to production url when deploying in production
 	final String HTML_BODY = "<h1>Please verify your email address</h1>"
 			+ "<p>Thank you for registering with our mobile app. To complete registration process and be able to log in, "
 			+ "please click on the following link: </p>"
-			+ "<a href='http://ec2-3-21-104-167.us-east-2.compute.amazonaws.com:8080/verification-service/email-verification.html?token=$tokenValue'>"
+			+ "<a href=" + SERVER + "/verification-service/email-verification.html?token=$tokenValue'>"
 			+ "Final step to complete your registration" + "</a><br/><br/>"
 			+ "Thanks you! We are waiting for you inside!";
 	
@@ -33,14 +37,14 @@ public class AmazonSES {
 	final String TEXT_BODY = "Please verify your email address"
 			+ "Thank you for registering with our mobile app. To complete registration process and be able to access your account, "
 			+ "please open the following link in your browser window: "
-			+ "http://ec2-3-21-104-167.us-east-2.compute.amazonaws.com:8080/verification-service/email-verification.html?token=$tokenValue'>"
+			+ SERVER + "/verification-service/email-verification.html?token=$tokenValue'>"
 			+ "Thanks you! We are waiting for you inside!";
 	
 	final String PASSWORD_RESET_HTML_BODY = "<h1>A request to reset your password</h1>"
 			+ "<p>Hi, $firstName!</p> "
 			+ "<p>Someone has requested to reset your password with our project. If this was not you, please ignore it.</p>"
 			+ " Otherwise, please click on the link below to set a new password: "
-			+ "<a href='http://localhost:8080/verification-service/password-reset.html?token=$tokenValue'>"
+			+ "<a href=" + SERVER + "/verification-service/password-reset.html?token=$tokenValue'>"
 			+ " Click this link to Reset Password"
 			+ "</a><br/><br/>"
 			+ "Thank you!";
@@ -48,8 +52,8 @@ public class AmazonSES {
 	final String PASSWORD_RESET_TEXT_BODY = "A request to reset your password "
 			+ "Hi, $firstName! "
 			+ "Someone has requested to reset your password with our project. If this was not you, please ignore it."
-			+ " Otherwise, please open the following link in a browser window to set a new password:"
-			+ " http://localhost:8080/verification-service/password-reset.html?token=$tokenValue"
+			+ " Otherwise, please open the following link in a browser window to set a new password: "
+			+ SERVER + "/verification-service/password-reset.html?token=$tokenValue"
 			+ " Thank you!";
 	
 	public void verifyEmail(UserDto userDto) {
